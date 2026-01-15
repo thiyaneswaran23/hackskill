@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import './SignIn.css';
+import { useState } from "react";
+import "./SignIn.css";
 import axios from "axios";
+
 function SignIn() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    role: 'Student'
+    email: "",
+    password: ""
   });
 
   const handleChange = (e) => {
@@ -15,6 +15,7 @@ function SignIn() {
       [name]: value
     }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -27,10 +28,12 @@ function SignIn() {
         }
       );
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const { token, user } = res.data;
 
-      alert("Signin successful");
+      // 🔥 Store exactly what Dashboard expects
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       window.location.href = "/dashboard";
 
     } catch (err) {
@@ -38,19 +41,17 @@ function SignIn() {
     }
   };
 
-
   return (
     <div className="signin-page">
       <div className="signin-container">
         <div className="signin-card">
           <h1 className="signin-title">Welcome Back</h1>
-          
+
           <form onSubmit={handleSubmit} className="signin-form">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label>Email</label>
               <input
                 type="email"
-                id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
@@ -60,31 +61,15 @@ function SignIn() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label>Password</label>
               <input
                 type="password"
-                id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
                 required
               />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="role">Role</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="role-select"
-              >
-                <option value="Student">Student</option>
-                <option value="Alumni">Alumni</option>
-                <option value="Admin">Admin</option>
-              </select>
             </div>
 
             <button type="submit" className="signin-button">

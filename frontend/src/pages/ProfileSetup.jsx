@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import './ProfileSetup.css';
-
+import axios from "axios";
 function ProfileSetup() {
   const [userRole, setUserRole] = useState('student');
+  const [isParsing, setIsParsing] = useState(false); // Track resume parsing
+
   const [formData, setFormData] = useState({
     // Common fields
     fullName: '',
@@ -57,126 +59,137 @@ function ProfileSetup() {
         [name]: ''
       }));
     }
-  };
-
-  const handleResumeUpload = (e) => {
+  };const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.type !== 'application/pdf') {
-        setErrors(prev => ({
-          ...prev,
-          resume: 'Please upload a PDF file only'
-        }));
-        return;
-      }
-      setResumeFile(file);
-      setIsResumeUploaded(true);
-      setErrors(prev => ({
-        ...prev,
-        resume: ''
-      }));
-
-      // Simulate resume parsing with mock data
-      setTimeout(() => {
-        const mockExtractedData = {
-          fullName: formData.fullName || 'John Doe',
-          email: formData.email || 'john.doe@example.com',
-          phone: '+1234567890',
-          education: 'Bachelor of Science in Computer Science',
-          skills: 'JavaScript, React, Node.js, Python',
-          domain: 'Software Development',
-          aboutMe: 'Experienced software developer with passion for web technologies.',
-          ...(userRole === 'student' ? {
-            currentYear: 'Final Year',
-            careerGoal: 'Software Engineer',
-            targetIndustry: 'Technology'
-          } : {
-            jobTitle: 'Senior Software Engineer',
-            company: 'Tech Corp',
-            yearsExperience: '5',
-            mentorshipAreas: 'Career Guidance, Technical Skills'
-          })
-        };
-
-        setFormData(prev => ({
-          ...prev,
-          ...mockExtractedData
-        }));
-      }, 1000);
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Common required fields
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-    if (!formData.education.trim()) newErrors.education = 'Education is required';
-    if (!formData.skills.trim()) newErrors.skills = 'Skills are required';
-    if (!formData.domain.trim()) newErrors.domain = 'Domain/Interest area is required';
-
-    // Student-only required fields
-    if (userRole === 'student') {
-      if (!formData.currentYear.trim()) newErrors.currentYear = 'Current year is required';
-      if (!formData.careerGoal.trim()) newErrors.careerGoal = 'Career goal is required';
-      if (!formData.mentorshipType.trim()) newErrors.mentorshipType = 'Mentorship type is required';
-      if (!formData.targetIndustry.trim()) newErrors.targetIndustry = 'Target industry is required';
-    }
-
-    // Alumni-only required fields
-    if (userRole === 'alumni') {
-      if (!formData.jobTitle.trim()) newErrors.jobTitle = 'Job title is required';
-      if (!formData.company.trim()) newErrors.company = 'Company is required';
-      if (!formData.yearsExperience.trim()) newErrors.yearsExperience = 'Years of experience is required';
-      if (!formData.mentorshipAreas.trim()) newErrors.mentorshipAreas = 'Mentorship areas are required';
-      if (!formData.availability.trim()) newErrors.availability = 'Availability is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
+    if (!file) return;
+  
+    if (file.type !== 'application/pdf') {
+      setErrors(prev => ({ ...prev, resume: 'Please upload a PDF file only' }));
       return;
     }
+  
+    setResumeFile(file);
+    setIsResumeUploaded(true);
+    setErrors(prev => ({ ...prev, resume: '' }));
+    setIsParsing(true);
+  
+    try {
+      const formDataObj = new FormData();
+      formDataObj.append('resume', file);
+  
+      const token = localStorage.getItem("token");
+  
+      const res = await axios.post("http://localhost:5000/api/resume/parse", formDataObj, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+  
+      const data = res.data;
+  
+      // --- Mapping for student dropdowns ---
+      const yearMapping = {
+        "first year": "First Year",
+        "second year": "Second Year",
+        "third year": "Third Year",
+        "final year": "Final Year",
+        "fourth year": "Final Year"
+      };
+  
+      const mentorshipMapping = {
+        "career guidance": "Career Guidance",
+        "technical skills": "Technical Skills",
+        "interview preparation": "Interview Preparation",
+        "industry insights": "Industry Insights",
+        "all of the above": "All of the above"
+      };
+  
+      // Merge parsed data into formData
+      setFormData(prev => ({
+        ...prev,
+        fullName: prev.fullName || data.fullName || '',
+        email: prev.email || data.email || '',
+        phone: prev.phone || data.phone || '',
+        education: prev.education || data.education || '',
+        skills: prev.skills || (data.skills?.join(', ') || ''),
+        domain: prev.domain || data.domain || '',
+        aboutMe: prev.aboutMe || data.aboutMe || '',
+        // Student fields
+        currentYear: prev.currentYear || yearMapping[data.currentYear?.toLowerCase()?.trim()] || '',
+        careerGoal: prev.careerGoal || data.careerGoal || '',
+        mentorshipType: prev.mentorshipType || mentorshipMapping[data.mentorshipType?.toLowerCase()?.trim()] || '',
+        targetIndustry: prev.targetIndustry || data.targetIndustry || '',
+        // Alumni fields
+        jobTitle: prev.jobTitle || data.jobTitle || '',
+        company: prev.company || data.company || '',
+        yearsExperience: prev.yearsExperience || data.yearsExperience || '',
+        mentorshipAreas: prev.mentorshipAreas || (data.mentorshipAreas?.join(', ') || ''),
+        availability: prev.availability || data.availability || ''
+      }));
+  
+    } catch (error) {
+      console.error(error);
+      setErrors(prev => ({ ...prev, resume: 'Failed to parse resume' }));
+    } finally {
+      setIsParsing(false);
+    }
+  };
+  
+ 
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+  
     // Build profile object
     const profile = {
-      // Common fields
       fullName: formData.fullName,
-      email: formData.email,
       phone: formData.phone || null,
       education: formData.education,
       skills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
       domain: formData.domain,
       aboutMe: formData.aboutMe || null,
-      role: userRole
+      ...(userRole === 'student'
+        ? {
+            currentYear: formData.currentYear,
+            careerGoal: formData.careerGoal,
+            mentorshipType: formData.mentorshipType,
+            targetIndustry: formData.targetIndustry
+          }
+        : {
+            jobTitle: formData.jobTitle,
+            company: formData.company,
+            yearsExperience: parseInt(formData.yearsExperience),
+            mentorshipAreas: formData.mentorshipAreas.split(',').map(s => s.trim()).filter(s => s),
+            availability: parseInt(formData.availability)
+          })
     };
-
-    // Add role-specific fields
-    if (userRole === 'student') {
-      profile.currentYear = formData.currentYear;
-      profile.careerGoal = formData.careerGoal;
-      profile.mentorshipType = formData.mentorshipType;
-      profile.targetIndustry = formData.targetIndustry;
-    } else if (userRole === 'alumni') {
-      profile.jobTitle = formData.jobTitle;
-      profile.company = formData.company;
-      profile.yearsExperience = parseInt(formData.yearsExperience);
-      profile.mentorshipAreas = formData.mentorshipAreas.split(',').map(s => s.trim()).filter(s => s);
-      profile.availability = parseInt(formData.availability);
+  
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await axios.post("http://localhost:5000/api/profile/save", profile, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+  
+      // Success
+      alert("Profile saved successfully!");
+      localStorage.setItem("profile", JSON.stringify(res.data.profile));
+    } catch (error) {
+      console.error(error);
+      if (error.response) {
+        // Backend returned an error
+        alert(error.response.data.message || "Failed to save profile");
+      } else {
+        // Network or other error
+        alert("Server error");
+      }
     }
-
-    console.log('Profile Data:', profile);
   };
-
+  
   const isFormValid = () => {
     const requiredFields = [
       'fullName', 'email', 'education', 'skills', 'domain'

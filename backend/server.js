@@ -1,8 +1,13 @@
+const cors = require("cors");
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
-const cors = require("cors");
-require("dotenv").config();
+const profileRoutes = require("./routes/profileRoutes");
+const resumeRoutes = require("./routes/resumeRoutes");
+
+
+
 
 const app = express();
 
@@ -16,6 +21,10 @@ app.get("/", (req, res) => {
 });
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/resume", resumeRoutes);
+
+
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)

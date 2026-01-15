@@ -132,22 +132,24 @@ function Dashboard() {
       <main className="dashboard-main">
         <WelcomeSection userName={userName} role={userRole} />
 
-        {/* Profile Completion Banner */}
-        {!isProfileComplete && userRole !== 'admin' && (
-          <div className="profile-banner">
-            <div className="profile-banner-content">
-              <span className="profile-banner-text">
-                Complete your profile to unlock full features
-              </span>
-              <button 
-                className="profile-banner-button"
-                onClick={() => handleButtonClick('complete-profile')}
-              >
-                Complete Profile
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Profile Completion / Update Banner */}
+{userRole !== 'admin' && (
+  <div className="profile-banner">
+    <div className="profile-banner-content">
+      <span className="profile-banner-text">
+        {isProfileComplete
+          ? "Update your profile to keep your information current"
+          : "Complete your profile to unlock full features"}
+      </span>
+      <button 
+        className="profile-banner-button"
+        onClick={() => handleButtonClick('complete-profile')}
+      >
+        {isProfileComplete ? "Update Profile" : "Complete Profile"}
+      </button>
+    </div>
+  </div>
+)}
 
         <section className="dashboard-cards">
           <div className="cards-container">

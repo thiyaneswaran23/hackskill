@@ -4,6 +4,8 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ProfileSetup from "./pages/ProfileSetup";
+
 function App() {
   return (
     <Router>
@@ -16,6 +18,7 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
         </Route>
       </Routes>
     </Router>

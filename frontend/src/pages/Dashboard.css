@@ -14,6 +14,52 @@
   width: 100%;
 }
 
+/* Profile Completion Banner */
+.profile-banner {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.profile-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.profile-banner-text {
+  font-size: 1rem;
+  color: #2c3e50;
+  font-weight: 500;
+  flex: 1;
+}
+
+.profile-banner-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.profile-banner-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.profile-banner-button:active {
+  transform: translateY(0);
+}
+
 /* Dashboard Cards Section */
 .dashboard-cards {
   margin-top: 2rem;
@@ -29,6 +75,16 @@
 @media (max-width: 768px) {
   .dashboard-main {
     padding: 2rem 1rem;
+  }
+
+  .profile-banner-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .profile-banner-button {
+    width: 100%;
   }
 
   .cards-container {

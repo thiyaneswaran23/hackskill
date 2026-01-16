@@ -136,10 +136,13 @@ function ProfileSetup() {
   };
   
  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!isFormValid()) {
+      alert("Please fill all required fields");
+      return;
+    }
+  
   
     // Build profile object
     const profile = {

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // <-- import useNavigate
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import DashboardHeader from '../components/DashboardHeader';
 import WelcomeSection from '../components/WelcomeSection';
 import DashboardCard from '../components/DashboardCard';
 
 function Dashboard() {
-  const navigate = useNavigate(); // <-- initialize navigate
+  const navigate = useNavigate();
+
   const [userName, setUserName] = useState('');
   const [userRole, setUserRole] = useState('student');
   const [isProfileComplete, setIsProfileComplete] = useState(false);
@@ -18,6 +19,7 @@ function Dashboard() {
         const user = JSON.parse(userStr);
         setUserName(user.name || user.email || '');
         setUserRole(user.role?.toLowerCase() || 'student');
+
         const profileData = localStorage.getItem('profile');
         setIsProfileComplete(!!profileData);
       }
@@ -32,124 +34,145 @@ function Dashboard() {
     window.location.href = '/signin';
   };
 
+  /* =========================
+     NAVIGATION LOGIC (FIXED)
+     ========================= */
   const handleButtonClick = (action) => {
-    switch(action) {
+    switch (action) {
       case 'complete-profile':
-        navigate('/profile-setup'); // <-- navigate to ProfileSetup page
+        navigate('/profile-setup');
         break;
+
+      // Student
       case 'find-mentor':
-        navigate('/mentors');
+        navigate('/student/mentor-match');
         break;
       case 'view-progress':
-        navigate('/progress');
+        navigate('/student/progress');
         break;
+
+      // Alumni
       case 'view-requests':
-        navigate('/mentorship-requests');
+        navigate('/alumni/requests');
         break;
       case 'view-mentees':
-        navigate('/my-mentees');
+        navigate('/alumni/mentees');
         break;
+
+      // Admin (future)
       case 'manage-users':
         navigate('/admin/users');
         break;
       case 'view-analytics':
         navigate('/admin/analytics');
         break;
+
       default:
-        console.log(`Unknown action: ${action}`);
+        console.warn(`Unknown action: ${action}`);
     }
   };
 
-  // Dashboard cards
+  /* =========================
+     DASHBOARD CARDS
+     ========================= */
   const studentCards = [
     {
       icon: '🤖',
       title: 'AI Mentor Match',
-      description: 'Get AI-powered recommendations for alumni mentors who align with your career path and skill development needs.',
+      description:
+        'Get AI-powered recommendations for alumni mentors aligned with your career goals and skill roadmap.',
       buttonText: 'Find Mentor',
-      action: 'find-mentor'
+      action: 'find-mentor',
     },
     {
       icon: '📊',
       title: 'Progress & Outcomes',
-      description: 'Track your skill growth, mentorship milestones, and placement readiness metrics in real-time.',
+      description:
+        'Track skill growth, mentorship milestones, and placement readiness in real time.',
       buttonText: 'View Progress',
-      action: 'view-progress'
-    }
+      action: 'view-progress',
+    },
   ];
 
   const alumniCards = [
     {
       icon: '📨',
       title: 'Mentorship Requests',
-      description: 'Review and respond to incoming mentorship requests from students seeking guidance.',
+      description:
+        'Review and respond to mentorship requests from students.',
       buttonText: 'View Requests',
-      action: 'view-requests'
+      action: 'view-requests',
     },
     {
       icon: '🤝',
       title: 'My Mentees',
-      description: 'Manage your ongoing mentorship engagements and track progress with current mentees.',
+      description:
+        'Manage active mentorships and track mentee progress.',
       buttonText: 'View Mentees',
-      action: 'view-mentees'
-    }
+      action: 'view-mentees',
+    },
   ];
 
   const adminCards = [
     {
       icon: '👥',
       title: 'User Management',
-      description: 'Overview and management of all students and alumni accounts on the platform.',
+      description:
+        'Manage students, alumni, and platform access.',
       buttonText: 'Manage Users',
-      action: 'manage-users'
+      action: 'manage-users',
     },
     {
       icon: '📊',
       title: 'Platform Analytics',
-      description: 'Comprehensive analytics on platform usage, engagement metrics, and mentorship success rates.',
+      description:
+        'Monitor engagement, mentorship success, and growth metrics.',
       buttonText: 'View Analytics',
-      action: 'view-analytics'
-    }
+      action: 'view-analytics',
+    },
   ];
 
   const getCardsForRole = () => {
-    switch (userRole?.toLowerCase()) {
-      case 'alumni': return alumniCards;
-      case 'admin': return adminCards;
+    switch (userRole) {
+      case 'alumni':
+        return alumniCards;
+      case 'admin':
+        return adminCards;
       case 'student':
-      default: return studentCards;
+      default:
+        return studentCards;
     }
   };
 
   return (
     <div className="dashboard-page">
-      <DashboardHeader 
-        userName={userName} 
+      <DashboardHeader
+        userName={userName}
         userRole={userRole}
-        onLogout={handleLogout} 
+        onLogout={handleLogout}
       />
 
       <main className="dashboard-main">
         <WelcomeSection userName={userName} role={userRole} />
 
-        {/* Profile Completion / Update Banner */}
-{userRole !== 'admin' && (
-  <div className="profile-banner">
-    <div className="profile-banner-content">
-      <span className="profile-banner-text">
-        {isProfileComplete
-          ? "Update your profile to keep your information current"
-          : "Complete your profile to unlock full features"}
-      </span>
-      <button 
-        className="profile-banner-button"
-        onClick={() => handleButtonClick('complete-profile')}
-      >
-        {isProfileComplete ? "Update Profile" : "Complete Profile"}
-      </button>
-    </div>
-  </div>
-)}
+        {/* Profile Completion Banner */}
+        {userRole !== 'admin' && (
+          <div className="profile-banner">
+            <div className="profile-banner-content">
+              <span className="profile-banner-text">
+                {isProfileComplete
+                  ? 'Update your profile to keep your information current'
+                  : 'Complete your profile to unlock full features'}
+              </span>
+              <button
+                className="profile-banner-button"
+                onClick={() => handleButtonClick('complete-profile')}
+              >
+                {isProfileComplete ? 'Update Profile' : 'Complete Profile'}
+              </button>
+            </div>
+          </div>
+        )}
 
         <section className="dashboard-cards">
           <div className="cards-container">

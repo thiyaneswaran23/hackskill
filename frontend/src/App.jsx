@@ -5,6 +5,8 @@ import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfileSetup from "./pages/ProfileSetup";
+import MentorMatch from "./pages/AIMentorMatch";                                      
+import StudentProgress from "./pages/ProgressOutcomes";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
+          <Route path="/student/mentor-match" element={<MentorMatch />} />
+          <Route path="/student/progress" element={<StudentProgress />} />
         </Route>
       </Routes>
     </Router>

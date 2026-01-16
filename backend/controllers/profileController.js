@@ -48,3 +48,20 @@ exports.saveProfile = async (req, res) => {
     res.status(500).json({ message: "Server error: " + error.message });
   }
 };
+exports.getMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("profile role");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      role: user.role,
+      profile: user.profile
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch profile" });
+  }
+};

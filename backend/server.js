@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
+const mentorMatchRoutes = require("./routes/mentorMatchRoutes");
 
 
 
@@ -23,6 +24,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/resume", resumeRoutes);
+app.use("/api/mentor-match", mentorMatchRoutes);
+
 
 
 // MongoDB connection

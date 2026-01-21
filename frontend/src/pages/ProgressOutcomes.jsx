@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import './ProgressOutcomes.css';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import "./ProgressOutcomes.css";
 
 function ProgressOutcomes() {
   const [progressData, setProgressData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(""); // state for errors
 
   useEffect(() => {
     fetchProgress();
@@ -13,16 +14,43 @@ function ProgressOutcomes() {
   const fetchProgress = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/student/progress', {
+      setErrorMsg("");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setErrorMsg("No token found. Please log in.");
+        setProgressData(null);
+        return;
+      }
+
+      const res = await axios.get("http://localhost:5000/api/student/progress", {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       setProgressData(res.data);
     } catch (error) {
-      console.error('Error fetching progress:', error);
-      // For demo purposes, use mock data if API fails
+      console.error("Error fetching progress:", error);
+
+      if (error.response) {
+        // Received response from server
+        if (error.response.status === 404) {
+          setErrorMsg("Student data not found.");
+        } else if (error.response.status === 401) {
+          setErrorMsg("Unauthorized. Invalid or expired token.");
+        } else {
+          setErrorMsg(`Server error: ${error.response.statusText}`);
+        }
+      } else if (error.request) {
+        // No response received
+        setErrorMsg("Cannot connect to server. Make sure backend is running.");
+      } else {
+        // Something else happened
+        setErrorMsg(error.message);
+      }
+
       setProgressData(null);
     } finally {
       setLoading(false);
@@ -30,9 +58,9 @@ function ProgressOutcomes() {
   };
 
   const getReadinessStatus = (score) => {
-    if (score >= 80) return { text: 'Ready', color: '#10b981' };
-    if (score >= 60) return { text: 'In Progress', color: '#f59e0b' };
-    return { text: 'Getting Started', color: '#ef4444' };
+    if (score >= 80) return { text: "Ready", color: "#10b981" };
+    if (score >= 60) return { text: "In Progress", color: "#f59e0b" };
+    return { text: "Getting Started", color: "#ef4444" };
   };
 
   const calculateSkillsCompletion = (skills) => {
@@ -41,6 +69,7 @@ function ProgressOutcomes() {
     return Math.round(total / skills.length);
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="progress-page">
@@ -54,6 +83,7 @@ function ProgressOutcomes() {
     );
   }
 
+  // Error / empty state
   if (!progressData) {
     return (
       <div className="progress-page">
@@ -66,7 +96,9 @@ function ProgressOutcomes() {
           </div>
           <div className="empty-state">
             <div className="empty-icon">📊</div>
-            <p className="empty-text">No progress data available. Start your mentorship journey to see your progress here.</p>
+            <p className="empty-text">
+              {errorMsg || "No progress data available. Start your mentorship journey to see your progress here."}
+            </p>
           </div>
         </div>
       </div>
@@ -119,7 +151,7 @@ function ProgressOutcomes() {
             <div className="card-icon">✅</div>
             <div className="card-content">
               <h3 className="card-title">Placement Status</h3>
-              <p 
+              <p
                 className="card-value status-value"
                 style={{ color: readinessStatus.color }}
               >
@@ -141,7 +173,7 @@ function ProgressOutcomes() {
                     <span className="skill-percentage">{skill.progress}%</span>
                   </div>
                   <div className="progress-bar-container">
-                    <div 
+                    <div
                       className="progress-bar-fill"
                       style={{ width: `${skill.progress}%` }}
                     ></div>
@@ -166,13 +198,13 @@ function ProgressOutcomes() {
                 <div className="timeline-content">
                   <h4 className="timeline-title">Mentor Assigned</h4>
                   <p className="timeline-description">
-                    Matched with {progressData.mentorship.mentorName || 'your mentor'}
+                    Matched with {progressData.mentorship.mentorName || "your mentor"}
                   </p>
                   <span className="timeline-date">Started</span>
                 </div>
               </div>
 
-              <div className={`timeline-item ${progressData.mentorship.sessionsCompleted > 0 ? 'completed' : 'pending'}`}>
+              <div className={`timeline-item ${progressData.mentorship.sessionsCompleted > 0 ? "completed" : "pending"}`}>
                 <div className="timeline-marker"></div>
                 <div className="timeline-content">
                   <h4 className="timeline-title">Sessions Completed</h4>
@@ -201,14 +233,12 @@ function ProgressOutcomes() {
                   <div className="timeline-marker"></div>
                   <div className="timeline-content">
                     <h4 className="timeline-title">Next Session</h4>
-                    <p className="timeline-description">
-                      Scheduled mentorship session
-                    </p>
+                    <p className="timeline-description">Scheduled mentorship session</p>
                     <span className="timeline-date">
-                      {new Date(progressData.mentorship.nextSession).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
+                      {new Date(progressData.mentorship.nextSession).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
                       })}
                     </span>
                   </div>

@@ -35,7 +35,7 @@ function Dashboard() {
   };
 
   /* =========================
-     NAVIGATION LOGIC (FIXED)
+     NAVIGATION LOGIC
      ========================= */
   const handleButtonClick = (action) => {
     switch (action) {
@@ -43,12 +43,18 @@ function Dashboard() {
         navigate('/profile-setup');
         break;
 
+      // Career Resources (Role Based)
+      case 'career-resources':
+        if (userRole === 'alumni') {
+          navigate('/alumni/career-resources');
+        } else {
+          navigate('/student/career-resources');
+        }
+        break;
+
       // Student
       case 'find-mentor':
         navigate('/student/mentor-match');
-        break;
-      case 'view-progress':
-        navigate('/student/progress');
         break;
 
       // Alumni
@@ -59,7 +65,7 @@ function Dashboard() {
         navigate('/alumni/mentees');
         break;
 
-      // Admin (future)
+      // Admin
       case 'manage-users':
         navigate('/admin/users');
         break;
@@ -75,26 +81,35 @@ function Dashboard() {
   /* =========================
      DASHBOARD CARDS
      ========================= */
+
   const studentCards = [
     {
       icon: '🤖',
       title: 'AI Mentor Match',
       description:
-        'Get AI-powered recommendations for alumni mentors aligned with your career goals and skill roadmap.',
+        'Get AI-powered mentor recommendations aligned with your career goals.',
       buttonText: 'Find Mentor',
       action: 'find-mentor',
     },
     {
-      icon: '📊',
-      title: 'Progress & Outcomes',
+      icon: '📚',
+      title: 'Career Resources',
       description:
-        'Track skill growth, mentorship milestones, and placement readiness in real time.',
-      buttonText: 'View Progress',
-      action: 'view-progress',
+        'Access job openings, internships, interview prep, and learning resources shared by alumni.',
+      buttonText: 'Explore Resources',
+      action: 'career-resources',
     },
   ];
 
   const alumniCards = [
+    {
+      icon: '📚',
+      title: 'Career Resources',
+      description:
+        'Share job opportunities, internships, and career resources with students.',
+      buttonText: 'Manage Resources',
+      action: 'career-resources',
+    },
     {
       icon: '📨',
       title: 'Mentorship Requests',
